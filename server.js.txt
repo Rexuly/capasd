@@ -1,0 +1,47 @@
+// server.js
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+
+const app = express();
+app.use(express.json());
+
+const KEYS_FILE = path.join(__dirname, "keys.json");
+
+// Helper to load and save keys
+function loadKeys() {
+  const data = fs.readFileSync(KEYS_FILE);
+  return JSON.parse(data);
+}
+
+function saveKeys(keys) {
+  fs.writeFileSync(KEYS_FILE, JSON.stringify(keys, null, 2));
+}
+
+// POST /redeem
+app.post("/redeem", (req, res) => {
+  const { key } = req.body;
+  if (!key) return res.status(400).json({ success: false, message: "Key is required" });
+
+  const keys = loadKeys();
+  const foundKey = keys.find(k => k.key === key);
+
+  if (!foundKey) {
+    return res.status(404).json({ success: false, message: "Invalid key" });
+  }
+
+  if (foundKey.redeemed) {
+    return res.status(403).json({ success: false, message: "Key already redeemed" });
+  }
+
+  foundKey.redeemed = true;
+  saveKeys(keys);
+
+  return res.json({ success: true, message: "Key redeemed successfully" });
+});
+
+// Start server
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Local key auth server running on http://localhost:${PORT}`);
+});

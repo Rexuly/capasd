@@ -1,0 +1,5 @@
+[
+  { "key": "ABC123", "redeemed": false },
+  { "key": "DEF456", "redeemed": false },
+  { "key": "XYZ789", "redeemed": false }
+]
